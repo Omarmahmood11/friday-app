@@ -27,12 +27,13 @@ const PLACEHOLDERS = [
   "Write it down before it fades.",
 ];
 
-function getGreeting(): string {
+function getGreeting(name?: string): string {
   const h = new Date().getHours();
-  if (h >= 5 && h < 12) return 'Good morning.';
-  if (h >= 12 && h < 17) return 'Good afternoon.';
-  if (h >= 17 && h < 21) return 'Good evening.';
-  return 'Late night thoughts?';
+  const suffix = name ? `, ${name}.` : '.';
+  if (h >= 5 && h < 12) return `Good morning${suffix}`;
+  if (h >= 12 && h < 17) return `Good afternoon${suffix}`;
+  if (h >= 17 && h < 21) return `Good evening${suffix}`;
+  return name ? `Still up, ${name}?` : 'Late night thoughts?';
 }
 
 function getPlaceholder(): string {
@@ -60,8 +61,12 @@ export default function NoteEditor({
 }: Props) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const dragCounterRef = useRef(0);
-  const [greeting] = useState(getGreeting);
+  const [userName, setUserName] = useState(() => localStorage.getItem('friday-user-name') ?? '');
+  const [showNamePrompt, setShowNamePrompt] = useState(() => !localStorage.getItem('friday-user-name'));
+  const [nameInput, setNameInput] = useState('');
+  const [greeting] = useState(() => getGreeting(localStorage.getItem('friday-user-name') ?? undefined));
   const [placeholder] = useState(getPlaceholder);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -105,12 +110,26 @@ export default function NoteEditor({
   }
 
   useEffect(() => {
-    textareaRef.current?.focus();
+    if (showNamePrompt) {
+      nameInputRef.current?.focus();
+    } else {
+      textareaRef.current?.focus();
+    }
     return () => {
       urlsRef.current.forEach(e => URL.revokeObjectURL(e.url));
       fileUrlsRef.current.forEach(e => URL.revokeObjectURL(e.url));
     };
   }, []);
+
+  const submitName = () => {
+    const trimmed = nameInput.trim();
+    if (trimmed) {
+      localStorage.setItem('friday-user-name', trimmed);
+      setUserName(trimmed);
+    }
+    setShowNamePrompt(false);
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  };
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
@@ -234,10 +253,36 @@ export default function NoteEditor({
         <div className={`flex-1 overflow-y-auto px-6 pb-6 ${sidebarOpen ? 'pt-14' : 'pt-16'}`}>
           <div className="max-w-2xl mx-auto w-full">
 
-            {isEmpty && (
+            {isEmpty && !showNamePrompt && (
               <p className="text-stone-300 dark:text-stone-600 text-[15px] font-medium mb-8 select-none pointer-events-none">
-                {greeting}
+                {getGreeting(userName || undefined)}
               </p>
+            )}
+
+            {showNamePrompt && (
+              <div className="mb-8">
+                <p className="text-stone-300 dark:text-stone-600 text-[15px] font-medium mb-4 select-none">
+                  What's your name?
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    value={nameInput}
+                    onChange={e => setNameInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') submitName(); if (e.key === 'Escape') { setShowNamePrompt(false); setTimeout(() => textareaRef.current?.focus(), 50); } }}
+                    placeholder="Your first name"
+                    className="bg-transparent outline-none text-stone-800 dark:text-stone-100 text-[18px] leading-[1.8] placeholder-stone-300 dark:placeholder-stone-600 w-48"
+                    style={{ fontFamily: 'inherit' }}
+                  />
+                  <button
+                    onClick={submitName}
+                    className="text-[13px] font-medium text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Image attachments */}
