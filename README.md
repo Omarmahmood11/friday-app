@@ -1,54 +1,46 @@
 # Friday
 
-A minimal journaling app for macOS. Built to stay out of your way — no accounts, no sync, no cloud. Everything lives locally on your machine.
+A journaling app for macOS. Nothing syncs anywhere. No accounts, no backend — everything stays on your machine.
+
+## Why I built this
+
+Notion felt like too much. Apple Notes felt like too little. I kept switching between things and nothing was quite right. I just wanted something that opened fast, greeted me by name, and let me write without thinking about where it lives or who could see it.
+
+I used Claude to build it. Product and UX decisions were mine, Claude handled the code. Took a few days.
 
 ## What it does
 
-- Write daily entries with a clean, distraction-free editor
-- Auto-tags entries by mood (`idea`, `memory`, `task`, `reflection`) and topic (`work`, `health`, `creative`, etc.)
-- Browse by date or by type, with colored mood dots in the sidebar
-- Dark mode, keyboard shortcuts, autocorrect
-- Packages as a native macOS desktop app via Electron
+- Local journal entries, stored in IndexedDB (nothing leaves your machine)
+- Auto-tags entries by mood: ideas, tasks, memories, reflections
+- Sidebar shows entries by date or grouped by type
+- Time-aware greeting that asks your name the first time you open it
+- Dark mode, autocorrect, keyboard shortcuts
 
-## Stack
+## Runs on
 
-- React 18 + TypeScript
-- Vite 4
-- Tailwind CSS 3
-- Electron 28
-- IndexedDB (all data stays local)
+macOS, Apple Silicon only (M1/M2/M3). Haven't tested it on Intel or other platforms.
 
-## Run locally
+## Run it locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Build the macOS app
+## Build the app
 
 ```bash
 npm run package
 ```
 
-This outputs a `.app` to `release/mac-arm64/`. Requires macOS arm64 (Apple Silicon).
+Outputs `Friday.app` to `release/mac-arm64/`.
 
-## Use this as a starting point
+## The code
 
-If you want to build your own journaling or note-taking app on top of this:
+- `src/db.ts` — entry storage
+- `src/tagger.ts` — mood and tag logic
+- `src/components/NoteEditor.tsx` — the writing interface
+- `src/components/Sidebar.tsx` — sidebar with date/type toggle
+- `electron/main.js` — Electron config
 
-- **`src/db.ts`** — IndexedDB setup, entry schema, all read/write operations
-- **`src/tagger.ts`** — mood and tag analysis logic, easy to extend with your own categories
-- **`src/components/NoteEditor.tsx`** — the main writing interface
-- **`src/components/Sidebar.tsx`** — entry list with date/type toggle
-- **`electron/main.js`** — Electron main process, minimal config
-
-The app has no backend, no auth, and no external dependencies at runtime — just clone, install, and run.
-
-## Built with AI
-
-This project was designed and built using Claude Code as an AI development partner. The product decisions, UX direction, and feature choices are mine — Claude handled the implementation.
-
-## License
-
-MIT
+Built with Claude Code. MIT.
