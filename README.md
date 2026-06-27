@@ -14,8 +14,6 @@ A simple journaling app for macOS. Everything stays local — no accounts, no cl
 
 React 18, TypeScript, Vite, Tailwind CSS, Electron. Data stored in IndexedDB.
 
-I'm not a developer — I built this using Claude as my coding partner. The product decisions were mine, Claude handled the implementation.
-
 ## Runs on
 
 macOS, Apple Silicon (M1/M2/M3) only.
